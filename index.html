@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CryptBox: Secure File Encryption Made Simple</title>
+    <link rel="icon" href="./lock.jpg" />
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#00F5FF", secondary: "#FF00FF" },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
+    />
+    <style>
+      :where([class^="ri-"])::before {
+        content: "\f3c2";
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #0d1117;
+        color: #e6edf3;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-family: "JetBrains Mono", monospace;
+      }
+      .code-font {
+        font-family: "Fira Code", monospace;
+      }
+      .glow {
+        text-shadow:
+          0 0 10px rgba(0, 245, 255, 0.7),
+          0 0 20px rgba(0, 245, 255, 0.5);
+      }
+      .card-glow:hover {
+        box-shadow: 0 0 15px rgba(0, 245, 255, 0.3);
+      }
+      .grid-bg {
+        background-image:
+          linear-gradient(rgba(13, 17, 23, 0.97) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(13, 17, 23, 0.97) 1px, transparent 1px);
+        background-size: 20px 20px;
+        background-position: center center;
+      }
+      .hero-bg {
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-bg::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url("https://readdy.ai/api/search-image?query=A%20futuristic%20digital%20security%20interface%20with%20encryption%20symbols%2C%20binary%20code%2C%20and%20lock%20icons.%20Dark%20blue%20and%20black%20background%20with%20neon%20blue%20grid%20lines%20and%20glowing%20elements.%20Abstract%2C%20technical%2C%20cybersecurity%20themed%20background%20with%20subtle%20matrix%20code%20effect&width=1920&height=1080&seq=1&orientation=landscape");
+        background-size: cover;
+        background-position: center;
+        opacity: 0.2;
+        z-index: -1;
+      }
+      input[type="file"] {
+        display: none;
+      }
+      .upload-box {
+        border: 2px dashed rgba(0, 245, 255, 0.5);
+        transition: all 0.3s ease;
+      }
+      .upload-box:hover {
+        border-color: #00f5ff;
+        box-shadow: 0 0 15px rgba(0, 245, 255, 0.3);
+      }
+      .timeline-line {
+        background: linear-gradient(90deg, #00f5ff, #ff00ff);
+        height: 2px;
+      }
+      .timeline-circle {
+        background: linear-gradient(135deg, #00f5ff, #ff00ff);
+      }
+      .code-block {
+        background-color: #1e2430;
+        border-radius: 8px;
+        position: relative;
+      }
+      .badge {
+        background-color: #1e2430;
+        border: 1px solid rgba(0, 245, 255, 0.3);
+      }
+      input:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #00f5ff;
+        box-shadow: 0 0 0 2px rgba(0, 245, 255, 0.2);
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #00f5ff, #0099ff);
+        transition: all 0.3s ease;
+      }
+      .btn-primary:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 245, 255, 0.3);
+      }
+      .btn-outline {
+        border: 2px solid #00f5ff;
+        transition: all 0.3s ease;
+      }
+      .btn-outline:hover {
+        background-color: rgba(0, 245, 255, 0.1);
+        box-shadow: 0 0 12px rgba(0, 245, 255, 0.3);
+      }
+      @media (max-width: 768px) {
+        .timeline-container {
+          flex-direction: column;
+        }
+        .timeline-line {
+          width: 2px;
+          height: 40px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Hero Section -->
+    <section
+      class="hero-bg min-h-screen flex items-center justify-center px-4 py-20"
+    >
+      <div class="container mx-auto max-w-6xl">
+        <div class="text-center mb-12">
+          <h1 class="text-5xl md:text-6xl font-bold mb-4 glow">CryptBox</h1>
+          <p class="text-xl md:text-2xl mb-8 text-gray-300">
+            Secure File Encryption Made Simple
+          </p>
+          <p class="text-lg mb-12 max-w-2xl mx-auto">
+            Encrypt files with AES-256 in one click. Your data stays private,
+            secure, and on your device.
+          </p>
+
+          <div
+            class="upload-box max-w-xl mx-auto mb-8 p-8 rounded-lg bg-[#1E2430]/50 backdrop-blur-sm"
+          >
+            <label
+              for="file-upload"
+              class="cursor-pointer flex flex-col items-center"
+            >
+              <div
+                class="w-16 h-16 flex items-center justify-center mb-4 text-primary"
+              >
+                <i class="ri-upload-cloud-line ri-3x"></i>
+              </div>
+              <span class="text-lg mb-2">Drag and drop your file here</span>
+              <span class="text-sm text-gray-400">or click to browse</span>
+              <input id="file-upload" type="file" class="hidden" />
+            </label>
+            <!-- Currently selected file indicator -->
+            <div
+              id="selected-file-label"
+              class="mt-3 text-sm text-primary code-font hidden"
+            ></div>
+
+            <!-- Mode Selection -->
+            <div class="mt-4 flex justify-center gap-4">
+              <button
+                id="encrypt-mode"
+                class="btn-primary px-4 py-2 rounded-button"
+              >
+                Encrypt Mode
+              </button>
+              <button
+                id="decrypt-mode"
+                class="btn-outline px-4 py-2 rounded-button"
+              >
+                Decrypt Mode
+              </button>
+            </div>
+            <!-- Key Input for Encryption -->
+            <div id="encrypt-key-section" class="mt-4 hidden">
+              <input
+                id="encrypt-key"
+                type="text"
+                placeholder="Key will appear here after encrypting"
+                class="w-full p-3 bg-[#0A0E14] border border-gray-700 rounded-lg mb-4 code-font"
+                readonly
+              />
+              <button
+                id="encrypt-btn"
+                class="btn-primary px-4 py-2 rounded-button"
+              >
+                Encrypt File
+              </button>
+            </div>
+            <!-- Decrypt trigger, shown only in decrypt mode -->
+            <div id="decrypt-trigger-section" class="mt-4 hidden">
+              <button
+                id="decrypt-btn"
+                class="btn-primary px-4 py-2 rounded-button"
+              >
+                Decrypt File
+              </button>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap justify-center gap-4">
+            <button
+              class="btn-primary px-8 py-3 text-white font-medium !rounded-button whitespace-nowrap"
+            >
+              Download App
+            </button>
+            <a
+              href="#"
+              class="btn-outline px-8 py-3 text-primary font-medium !rounded-button whitespace-nowrap flex items-center gap-2"
+            >
+              <i class="ri-github-fill"></i> View GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section (unchanged) -->
+    <section class="py-20 px-4 bg-[#0A0E14]">
+      <div class="container mx-auto max-w-6xl">
+        <h2 class="text-3xl md:text-4xl font-bold mb-16 text-center">
+          Key Features
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div
+            class="bg-[#1E2430] p-8 rounded-lg card-glow transition-all duration-300"
+          >
+            <div
+              class="w-12 h-12 flex items-center justify-center mb-4 text-primary"
+            >
+              <i class="ri-lock-password-line ri-2x"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">AES-256 Encryption</h3>
+            <p class="text-gray-300">
+              Fast, symmetric encryption algorithm used by governments and
+              security experts worldwide. Perfect for quick file protection.
+            </p>
+          </div>
+          <div
+            class="bg-[#1E2430] p-8 rounded-lg card-glow transition-all duration-300"
+          >
+            <div
+              class="w-12 h-12 flex items-center justify-center mb-4 text-primary"
+            >
+              <i class="ri-hard-drive-2-line ri-2x"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">No Cloud Uploads</h3>
+            <p class="text-gray-300">
+              Your files never leave your device. All encryption and decryption
+              happens locally, ensuring maximum privacy and security.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section (unchanged, simplified for brevity) -->
+    <section class="py-20 px-4">
+      <div class="container mx-auto max-w-6xl">
+        <h2 class="text-3xl md:text-4xl font-bold mb-16 text-center">
+          How It Works
+        </h2>
+        <div
+          class="timeline-container items-center flex flex-col md:flex-row justify-between items-start mb-8"
+        >
+          <div class="flex flex-col items-center text-center px-4 md:w-1/4">
+            <div
+              class="timeline-circle w-12 h-12 flex items-center justify-center rounded-full text-white font-bold mb-4"
+            >
+              1
+            </div>
+            <div
+              class="w-12 h-12 flex items-center justify-center mb-2 text-primary"
+            >
+              <i class="ri-file-search-line ri-2x"></i>
+            </div>
+            <h3 class="text-lg font-bold mb-2">Select File</h3>
+            <p class="text-sm text-gray-300">
+              Choose any file from your device to encrypt or decrypt
+            </p>
+          </div>
+          <div
+            class="timeline-line w-full md:w-auto flex-grow md:flex-grow-0 my-4 md:my-0"
+          ></div>
+          <div class="flex flex-col items-center text-center px-4 md:w-1/4">
+            <div
+              class="timeline-circle w-12 h-12 flex items-center justify-center rounded-full text-white font-bold mb-4"
+            >
+              2
+            </div>
+            <div
+              class="w-12 h-12 flex items-center justify-center mb-2 text-primary"
+            >
+              <i class="ri-shield-keyhole-line ri-2x"></i>
+            </div>
+            <h3 class="text-lg font-bold mb-2">Choose Mode</h3>
+            <p class="text-sm text-gray-300">
+              Select encryption or decryption with AES-256
+            </p>
+          </div>
+          <div
+            class="timeline-line w-full md:w-auto flex-grow md:flex-grow-0 my-4 md:my-0"
+          ></div>
+          <div class="flex flex-col items-center text-center px-4 md:w-1/4">
+            <div
+              class="timeline-circle w-12 h-12 flex items-center justify-center rounded-full text-white font-bold mb-4"
+            >
+              3
+            </div>
+            <div
+              class="w-12 h-12 flex items-center justify-center mb-2 text-primary"
+            >
+              <i class="ri-lock-password-line ri-2x"></i>
+            </div>
+            <h3 class="text-lg font-bold mb-2">Set Key</h3>
+            <p class="text-sm text-gray-300">
+              Provide or generate a secure key
+            </p>
+          </div>
+          <div
+            class="timeline-line w-full md:w-auto flex-grow md:flex-grow-0 my-4 md:my-0"
+          ></div>
+          <div class="flex flex-col items-center text-center px-4 md:w-1/4">
+            <div
+              class="timeline-circle w-12 h-12 flex items-center justify-center rounded-full text-white font-bold mb-4"
+            >
+              4
+            </div>
+            <div
+              class="w-12 h-12 flex items-center justify-center mb-2 text-primary"
+            >
+              <i class="ri-download-cloud-line ri-2x"></i>
+            </div>
+            <h3 class="text-lg font-bold mb-2">Download File</h3>
+            <p class="text-sm text-gray-300">
+              Save your encrypted or decrypted file securely
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Technical Details, About, CTA, Footer sections unchanged (omitted for brevity) -->
+
+    <!-- Decryption Key Modal -->
+    <div
+      id="decrypt-modal"
+      class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
+    >
+      <div
+        class="bg-[#1E2430] p-8 rounded-lg max-w-md w-full border border-primary/30"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold">Enter Decryption Key</h3>
+          <button
+            onclick="
+              document.getElementById('decrypt-modal').classList.add('hidden')
+            "
+            class="text-gray-400 hover:text-primary"
+          >
+            <i class="ri-close-line ri-lg"></i>
+          </button>
+        </div>
+        <div
+          id="decrypt-modal-file"
+          class="text-sm text-gray-400 mb-3 code-font"
+        ></div>
+        <input
+          type="text"
+          id="decryption-key"
+          placeholder="Paste your 64-character hex key"
+          class="w-full p-3 bg-[#0A0E14] border border-gray-700 rounded-lg mb-4 code-font"
+          pattern="[0-9a-fA-F]{64}"
+          title="64-character hexadecimal key"
+        />
+        <div class="flex gap-4">
+          <button onclick="handleDecrypt()" class="btn-primary flex-1 py-3">
+            <i class="ri-lock-unlock-line mr-2"></i> Decrypt
+          </button>
+          <button
+            onclick="
+              document.getElementById('decrypt-modal').classList.add('hidden')
+            "
+            class="btn-outline flex-1 py-3"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- About the Developer Section -->
+    <section class="py-20 px-4">
+      <div class="container mx-auto max-w-6xl">
+        <div
+          class="max-w-2xl mx-auto bg-[#1E2430] p-8 rounded-lg border border-gray-700"
+        >
+          <h2 class="text-2xl font-bold mb-6 text-center">
+            About the Developer
+          </h2>
+
+          <p class="mb-6 text-gray-300">
+            Built by a cybersecurity student passionate about privacy tools.
+            With a background in computer science and a focus on cryptography,
+            CryptBox was created to make strong encryption accessible to
+            everyone while maintaining the highest security standards.
+          </p>
+
+          <p class="mb-8 text-gray-300">
+            The project began as a personal tool to securely share files with
+            colleagues, but quickly evolved into a full-featured application
+            designed to protect sensitive information in an increasingly
+            data-driven world.
+          </p>
+
+          <div class="text-center">
+            <a
+              href="https://my-portfolio-aa.vercel.app/"
+              class="inline-flex items-center text-primary hover:underline"
+            >
+              Visit Developer Portfolio
+              <i class="ri-arrow-right-line ml-2"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Footer Section -->
+    <footer class="bg-[#0A0E14] border-t border-gray-800 py-10 mt-12">
+      <div
+        class="container mx-auto max-w-6xl px-4 flex flex-col md:flex-row items-center justify-between gap-6"
+      >
+        <div class="text-center md:text-left">
+          <h4 class="text-lg font-bold mb-2">CryptBox</h4>
+          <p class="text-gray-400 text-sm mb-2">
+            &copy; 2024 CryptBox. All rights reserved.
+          </p>
+          <p class="text-gray-400 text-sm">
+            Built by
+            <span class="text-primary font-semibold">Amuda Abdullah</span>
+          </p>
+        </div>
+        <div class="flex items-center gap-5 text-2xl">
+          <a
+            href="https://wa.me/2347012546884"
+            target="_blank"
+            rel="noopener"
+            class="text-primary hover:text-secondary transition"
+          >
+            <i class="ri-whatsapp-line"></i>
+          </a>
+          <a
+            href="amudaabdullah35@gmail.com"
+            target="_blank"
+            rel="noopener"
+            class="text-primary hover:text-secondary transition"
+          >
+            <i class="ri-mail-line"></i>
+          </a>
+          <a
+            href="https://www.linkedin.com/in/amuda-abdullah-12966b24b/"
+            target="_blank"
+            rel="noopener"
+            class="text-primary hover:text-secondary transition"
+          >
+            <i class="ri-linkedin-box-line"></i>
+          </a>
+          <a
+            href="https://github.com/amuda-abdullah"
+            target="_blank"
+            rel="noopener"
+            class="text-primary hover:text-secondary transition"
+          >
+            <i class="ri-github-line"></i>
+          </a>
+          <a
+            href="https://x.com/its_AbdullahX"
+            target="_blank"
+            rel="noopener"
+            class="text-primary hover:text-secondary transition"
+          >
+            <i class="ri-twitter-x-line"></i>
+          </a>
+        </div>
+      </div>
+    </footer>
+    <!-- JavaScript -->
+    <script>
+      let selectedFile = null;
+      let mode = "encrypt"; // Default mode
+
+      // Notification function
+      function showNotification(message, isError = false) {
+        const notification = document.createElement("div");
+        notification.className = `fixed bottom-4 left-4 p-4 rounded-lg shadow-lg z-50 ${
+          isError ? "bg-red-900 text-red-200" : "bg-[#1E2430] text-primary"
+        }`;
+        notification.innerHTML = `
+    <div class="flex items-center">
+      <i class="${
+        isError ? "ri-error-warning-line" : "ri-checkbox-circle-line"
+      } mr-2"></i>
+      <span>${message}</span>
+    </div>
+  `;
+        document.body.appendChild(notification);
+        setTimeout(() => {
+          notification.style.opacity = "0";
+          notification.style.transition = "opacity 0.5s ease";
+          setTimeout(() => document.body.removeChild(notification), 500);
+        }, 3000);
+      }
+
+      // Triggers a browser download from an in-memory Blob - no server round trip needed
+      function downloadBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+      }
+
+      // Converts a base64 string (from the JSON response) into a downloadable Blob
+      function base64ToBlob(base64, mimeType = "application/octet-stream") {
+        const byteChars = atob(base64);
+        const byteNumbers = new Array(byteChars.length);
+        for (let i = 0; i < byteChars.length; i++) {
+          byteNumbers[i] = byteChars.charCodeAt(i);
+        }
+        return new Blob([new Uint8Array(byteNumbers)], { type: mimeType });
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const uploadBox = document.querySelector(".upload-box");
+        const fileInput = document.getElementById("file-upload");
+        const encryptModeBtn = document.getElementById("encrypt-mode");
+        const decryptModeBtn = document.getElementById("decrypt-mode");
+        const encryptKeySection = document.getElementById(
+          "encrypt-key-section",
+        );
+        const decryptTriggerSection = document.getElementById(
+          "decrypt-trigger-section",
+        );
+        const selectedFileLabel = document.getElementById(
+          "selected-file-label",
+        );
+
+        function updateSelectedFileLabel() {
+          if (selectedFile) {
+            selectedFileLabel.textContent = `Selected: ${selectedFile.name}`;
+            selectedFileLabel.classList.remove("hidden");
+          } else {
+            selectedFileLabel.classList.add("hidden");
+          }
+        }
+
+        // Drag and drop handlers
+        uploadBox.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          uploadBox.classList.add("border-primary");
+        });
+
+        uploadBox.addEventListener("dragleave", () => {
+          uploadBox.classList.remove("border-primary");
+        });
+
+        uploadBox.addEventListener("drop", (e) => {
+          e.preventDefault();
+          uploadBox.classList.remove("border-primary");
+          if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            handleFile(e.dataTransfer.files[0]);
+          }
+        });
+
+        fileInput.addEventListener("change", () => {
+          if (fileInput.files.length) {
+            handleFile(fileInput.files[0]);
+          }
+        });
+
+        // Mode switching
+        encryptModeBtn.addEventListener("click", () => {
+          mode = "encrypt";
+          encryptKeySection.classList.remove("hidden");
+          decryptTriggerSection.classList.add("hidden");
+          encryptModeBtn.classList.add("btn-primary");
+          encryptModeBtn.classList.remove("btn-outline");
+          decryptModeBtn.classList.add("btn-outline");
+          decryptModeBtn.classList.remove("btn-primary");
+          showNotification("Switched to Encrypt Mode");
+        });
+
+        decryptModeBtn.addEventListener("click", () => {
+          mode = "decrypt";
+          encryptKeySection.classList.add("hidden");
+          decryptTriggerSection.classList.remove("hidden");
+          decryptModeBtn.classList.add("btn-primary");
+          decryptModeBtn.classList.remove("btn-outline");
+          encryptModeBtn.classList.add("btn-outline");
+          encryptModeBtn.classList.remove("btn-primary");
+          showNotification("Switched to Decrypt Mode");
+        });
+
+        function handleFile(file) {
+          selectedFile = file;
+          updateSelectedFileLabel();
+          showNotification(`File selected: ${file.name}`);
+        }
+
+        // Decrypt trigger button - opens the modal for the currently selected file
+        document.getElementById("decrypt-btn").addEventListener("click", () => {
+          if (!selectedFile) {
+            showNotification("Please select a file first", true);
+            return;
+          }
+          document.getElementById("decrypt-modal-file").textContent =
+            `File: ${selectedFile.name}`;
+          document.getElementById("decrypt-modal").classList.remove("hidden");
+        });
+
+        // Encrypt File - server returns the encrypted bytes AND the key
+        // together in one response, so there's no separate download step
+        // and nothing to mix up on disk.
+        document
+          .getElementById("encrypt-btn")
+          .addEventListener("click", async () => {
+            if (!selectedFile) {
+              showNotification("Please select a file", true);
+              return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", selectedFile);
+
+            try {
+              const response = await fetch("/api/encrypt", {
+                method: "POST",
+                body: formData,
+              });
+
+              const result = await response.json();
+
+              if (!response.ok || result.error) {
+                throw new Error(result.error || "Encryption failed");
+              }
+
+              document.getElementById("encrypt-key").value = result.key;
+              showNotification("Encryption successful! Key saved above.");
+              downloadBlob(base64ToBlob(result.data), result.filename);
+            } catch (error) {
+              showNotification(`Error: ${error.message}`, true);
+              console.error("Encryption error:", error);
+            }
+          });
+      });
+
+      // Decrypt File - server returns the decrypted bytes directly
+      async function handleDecrypt() {
+        const key = document.getElementById("decryption-key").value.trim();
+
+        if (!key) {
+          showNotification("Please enter a decryption key", true);
+          return;
+        }
+
+        if (!/^[0-9a-fA-F]{64}$/.test(key)) {
+          showNotification(
+            "Invalid key format. Must be 64 hexadecimal characters",
+            true,
+          );
+          return;
+        }
+
+        if (!selectedFile) {
+          showNotification("Please select a file first", true);
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+        formData.append("key", key);
+
+        try {
+          const response = await fetch("/api/decrypt", {
+            method: "POST",
+            body: formData,
+          });
+
+          const result = await response.json();
+
+          if (!response.ok || result.error) {
+            throw new Error(result.error || "Decryption failed");
+          }
+
+          document.getElementById("decrypt-modal").classList.add("hidden");
+          document.getElementById("decryption-key").value = "";
+          showNotification("Decryption successful!");
+          downloadBlob(base64ToBlob(result.data), result.filename);
+        } catch (error) {
+          showNotification(`Decryption Error: ${error.message}`, true);
+          console.error("Decryption error:", error);
+        }
+      }
+    </script>
+  </body>
+</html>
